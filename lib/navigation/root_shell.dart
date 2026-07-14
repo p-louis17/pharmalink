@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../features/ralph_home/screens/home_screen.dart';
 
 // Owns the bottom nav and swaps tab bodies with IndexedStack so each
 // tab keeps its own state and scroll position when you switch away and back.
@@ -21,12 +22,16 @@ class RootShell extends StatefulWidget {
 class _RootShellState extends State<RootShell> {
   int _selectedIndex = 0;
 
-  static const _tabs = [
-    _PlaceholderTab(label: 'Home'),     // ralph_home
-    _PlaceholderTab(label: 'Search'),   // faith_search_detail
-    _PlaceholderTab(label: 'Map'),      // louis_map
-    _PlaceholderTab(label: 'Profile'),  // raquel_profile
-  ];
+  // Passed to HomeScreen so its logged-in taps (Quick Access, profile icon)
+  // can jump straight to a tab instead of going through the login screen.
+  void _goToTab(int index) => setState(() => _selectedIndex = index);
+
+  List<Widget> get _tabs => [
+        HomeScreen(onNavigateToTab: _goToTab),  // ralph_home
+        const _PlaceholderTab(label: 'Search'), // faith_search_detail
+        const _PlaceholderTab(label: 'Map'),    // louis_map
+        const _PlaceholderTab(label: 'Profile'), // raquel_profile
+      ];
 
   @override
   Widget build(BuildContext context) {

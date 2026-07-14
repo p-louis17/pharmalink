@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "405338951910",
+    "project_id": "pharmalink-6d256",
+    "storage_bucket": "pharmalink-6d256.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:405338951910:android:912582bc2f99401f17ab27",
+        "android_client_info": {
+          "package_name": "com.example.pharmalink"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCNFI4dlAMwY5ZEoe1fl4WbBmhYpfokdJc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
