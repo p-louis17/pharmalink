@@ -8,6 +8,7 @@ class Pharmacy {
   final double lng;
   final StockStatus stockStatus;
   final String? lastUpdatedLabel;
+  final String? phone;
 
   Pharmacy({
     required this.id,
@@ -17,6 +18,7 @@ class Pharmacy {
     required this.lng,
     this.stockStatus = StockStatus.unknown,
     this.lastUpdatedLabel,
+    this.phone,
   });
 
   /// Builds a Pharmacy from one OSM node returned by Overpass.
@@ -37,6 +39,16 @@ class Pharmacy {
       lat: (json['lat'] as num?)?.toDouble() ?? 0.0,
       lng: (json['lon'] as num?)?.toDouble() ?? 0.0,
       stockStatus: StockStatus.unknown,
+    );
+
+    return Pharmacy(
+      id: json['id'].toString(),
+      name: tags['name'] as String? ?? 'Unnamed pharmacy',
+      address: addressParts.isEmpty ? 'Address not available' : addressParts.join(', '),
+      lat: (json['lat'] as num?)?.toDouble() ?? 0.0,
+      lng: (json['lon'] as num?)?.toDouble() ?? 0.0,
+      stockStatus: StockStatus.unknown,
+      phone: tags['phone'] as String? ?? tags['contact:phone'] as String?,
     );
   }
 }

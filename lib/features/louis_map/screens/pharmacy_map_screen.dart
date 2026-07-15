@@ -126,10 +126,13 @@ class PharmacyMapScreen extends StatelessWidget {
               ),
 
               if (loaded.selectedPharmacy != null)
-                Positioned(
-                  left: 16, right: 16, bottom: 16,
-                  child: PharmacyDetailCard(pharmacy: loaded.selectedPharmacy!),
+              Positioned(
+                left: 16, right: 16, bottom: 16,
+                child: PharmacyDetailCard(
+                  pharmacy: loaded.selectedPharmacy!,
+                  userPosition: loaded.userPosition,
                 ),
+              ),
             ],
           );
         },

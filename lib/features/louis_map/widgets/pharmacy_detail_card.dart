@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import '../models/pharmacy.dart';
-import 'pharmacy_actions.dart';
 import 'pharmacy_actions.dart';
 
 class PharmacyDetailCard extends StatelessWidget {
   final Pharmacy pharmacy;
-  const PharmacyDetailCard({super.key, required this.pharmacy});
+  final Position userPosition;
+  const PharmacyDetailCard({super.key, required this.pharmacy, required this.userPosition});
 
   Color _statusColor(StockStatus status) {
     switch (status) {
@@ -31,6 +32,14 @@ class PharmacyDetailCard extends StatelessWidget {
       case StockStatus.unknown:
         return 'Stock unknown';
     }
+  }
+
+  String _distanceLabel() {
+    final meters = Geolocator.distanceBetween(
+      userPosition.latitude, userPosition.longitude,
+      pharmacy.lat, pharmacy.lng,
+    );
+    return meters < 1000 ? '${meters.round()}m away' : '${(meters / 1000).toStringAsFixed(1)}km away';
   }
 
   @override
@@ -64,14 +73,28 @@ class PharmacyDetailCard extends StatelessWidget {
             ),
             const SizedBox(height: 4),
             Text(pharmacy.address, style: TextStyle(color: Colors.grey.shade600, fontSize: 13)),
+            const SizedBox(height: 2),
+            Text(_distanceLabel(), style: TextStyle(color: Colors.grey.shade600, fontSize: 13)),
             const SizedBox(height: 12),
             Row(
               children: [
                 Expanded(
                   child: OutlinedButton.icon(
-                    onPressed: () {}, // TODO: launch phone dialer
+                    onPressed: pharmacy.phone == null
+                        ? null
+                        : () async {
+                            try {
+                              await PharmacyActions.callPharmacy(pharmacy.phone!);
+                            } catch (e) {
+                              if (context.mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(content: Text('Could not open dialer')),
+                                );
+                              }
+                            }
+                          },
                     icon: const Icon(Icons.call, size: 18),
-                    label: const Text('Call'),
+                    label: Text(pharmacy.phone == null ? 'No number' : 'Call'),
                   ),
                 ),
                 const SizedBox(width: 8),
