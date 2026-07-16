@@ -1,6 +1,3 @@
-// A single pharmacy's stock listing for a searched drug.
-// Mock data lives in screen.dart for now — swap for an API-backed
-// repository once the backend contract is ready.
 
 enum StockStatus { inStock, lowStock, unavailable }
 
