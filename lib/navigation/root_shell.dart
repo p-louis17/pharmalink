@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../features/faith_search_detail/screens/search_detail.dart';
+
 
 // Owns the bottom nav and swaps tab bodies with IndexedStack so each
 // tab keeps its own state and scroll position when you switch away and back.
@@ -23,7 +25,7 @@ class _RootShellState extends State<RootShell> {
 
   static const _tabs = [
     _PlaceholderTab(label: 'Home'),     // ralph_home
-    _PlaceholderTab(label: 'Search'),   // faith_search_detail
+    SearchResultsScreen(),   // faith_search_detail
     _PlaceholderTab(label: 'Map'),      // louis_map
     _PlaceholderTab(label: 'Profile'),  // raquel_profile
   ];
