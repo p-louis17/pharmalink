@@ -39,15 +39,6 @@ class Pharmacy {
       lat: (json['lat'] as num?)?.toDouble() ?? 0.0,
       lng: (json['lon'] as num?)?.toDouble() ?? 0.0,
       stockStatus: StockStatus.unknown,
-    );
-
-    return Pharmacy(
-      id: json['id'].toString(),
-      name: tags['name'] as String? ?? 'Unnamed pharmacy',
-      address: addressParts.isEmpty ? 'Address not available' : addressParts.join(', '),
-      lat: (json['lat'] as num?)?.toDouble() ?? 0.0,
-      lng: (json['lon'] as num?)?.toDouble() ?? 0.0,
-      stockStatus: StockStatus.unknown,
       phone: tags['phone'] as String? ?? tags['contact:phone'] as String?,
     );
   }

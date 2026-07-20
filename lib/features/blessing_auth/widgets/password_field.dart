@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'auth_text_field.dart';
+import '../../../core/theme/app_theme.dart';
 
 class PasswordField extends StatefulWidget {
   final TextEditingController controller;
@@ -49,7 +49,7 @@ class _PasswordFieldState extends State<PasswordField> {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
-          borderSide: const BorderSide(color: kAuthBrandBlue, width: 1.5),
+          borderSide: const BorderSide(color: AppTheme.primary, width: 1.5),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),

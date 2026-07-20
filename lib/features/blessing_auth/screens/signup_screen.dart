@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../cubit/auth_cubit.dart';
 import '../cubit/auth_state.dart';
 import '../widgets/auth_button.dart';
+import '../widgets/auth_header.dart';
 import '../widgets/auth_text_field.dart';
 import '../widgets/password_field.dart';
 
@@ -22,10 +23,7 @@ class _SignupScreenState extends State<SignupScreen> {
   final _addressController = TextEditingController();
   final _emailController = TextEditingController();
   final _phoneController = TextEditingController();
-  final _dateController = TextEditingController();
   final _passwordController = TextEditingController();
-
-  DateTime? _selectedDate;
 
   @override
   void dispose() {
@@ -33,7 +31,6 @@ class _SignupScreenState extends State<SignupScreen> {
     _addressController.dispose();
     _emailController.dispose();
     _phoneController.dispose();
-    _dateController.dispose();
     _passwordController.dispose();
     super.dispose();
   }
@@ -56,31 +53,8 @@ class _SignupScreenState extends State<SignupScreen> {
     return null;
   }
 
-  Future<void> _pickDate() async {
-    final now = DateTime.now();
-    final picked = await showDatePicker(
-      context: context,
-      initialDate: _selectedDate ?? DateTime(now.year - 18, now.month, now.day),
-      firstDate: DateTime(1900),
-      lastDate: now,
-    );
-    if (picked != null) {
-      setState(() {
-        _selectedDate = picked;
-        _dateController.text =
-            '${picked.year}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}';
-      });
-    }
-  }
-
   void _submit(BuildContext context) {
     if (!_formKey.currentState!.validate()) return;
-    if (_selectedDate == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select your date of birth')),
-      );
-      return;
-    }
 
     context.read<AuthCubit>().signUp(
           fullName: _fullNameController.text.trim(),
@@ -88,7 +62,6 @@ class _SignupScreenState extends State<SignupScreen> {
           password: _passwordController.text,
           phoneNumber: _phoneController.text.trim(),
           address: _addressController.text.trim(),
-          dateOfBirth: _selectedDate!,
         );
   }
 
@@ -102,7 +75,7 @@ class _SignupScreenState extends State<SignupScreen> {
         centerTitle: true,
         leading: const BackButton(color: Colors.black),
         title: const Text(
-          'Register',
+          'Create Account',
           style: TextStyle(color: Colors.black, fontWeight: FontWeight.w600),
         ),
       ),
@@ -125,6 +98,9 @@ class _SignupScreenState extends State<SignupScreen> {
                 key: _formKey,
                 child: Column(
                   children: [
+                    const SizedBox(height: 24),
+                    const AuthHeader(),
+                    const SizedBox(height: 32),
                     AuthTextField(
                       controller: _fullNameController,
                       hintText: 'Full Name',
@@ -151,25 +127,13 @@ class _SignupScreenState extends State<SignupScreen> {
                       validator: (v) => _required(v, 'Phone number'),
                     ),
                     const SizedBox(height: 14),
-                    AuthTextField(
-                      controller: _dateController,
-                      hintText: 'Select date',
-                      readOnly: true,
-                      onTap: _pickDate,
-                      suffixIcon: const Icon(Icons.calendar_today_outlined,
-                          color: Colors.grey, size: 20),
-                      validator: (_) => _selectedDate == null
-                          ? 'Date of birth is required'
-                          : null,
-                    ),
-                    const SizedBox(height: 14),
                     PasswordField(
                       controller: _passwordController,
                       validator: _validatePassword,
                     ),
                     const SizedBox(height: 22),
                     AuthButton(
-                      label: 'Register',
+                      label: 'Join Now',
                       isLoading: isLoading,
                       onPressed: () => _submit(context),
                     ),

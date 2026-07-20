@@ -15,7 +15,6 @@ abstract class AuthRepository {
     required String password,
     required String phoneNumber,
     required String address,
-    required DateTime dateOfBirth,
   });
 
   Future<void> sendPasswordResetEmail(String email);
@@ -53,7 +52,6 @@ class AuthRepositoryImpl implements AuthRepository {
     required String password,
     required String phoneNumber,
     required String address,
-    required DateTime dateOfBirth,
   }) async {
     await Future.delayed(const Duration(milliseconds: 600));
     return AppUser(
@@ -62,7 +60,6 @@ class AuthRepositoryImpl implements AuthRepository {
       email: email,
       phoneNumber: phoneNumber,
       address: address,
-      dateOfBirth: dateOfBirth,
       createdAt: DateTime.now(),
     );
   }

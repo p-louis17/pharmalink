@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'auth_text_field.dart';
+import '../../../core/theme/app_theme.dart';
 
 class AuthHeader extends StatelessWidget {
   final bool showAppName;
@@ -15,7 +15,7 @@ class AuthHeader extends StatelessWidget {
           width: 56,
           height: 56,
           decoration: BoxDecoration(
-            color: kAuthBrandBlue,
+            color: AppTheme.primary,
             borderRadius: BorderRadius.circular(14),
           ),
           child: const Icon(Icons.local_pharmacy_rounded,

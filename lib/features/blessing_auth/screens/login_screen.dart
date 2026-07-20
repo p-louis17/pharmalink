@@ -62,7 +62,7 @@ class _LoginScreenState extends State<LoginScreen> {
         centerTitle: true,
         leading: const BackButton(color: Colors.black),
         title: const Text(
-          'Login',
+          'Unlock PharmaLink',
           style: TextStyle(color: Colors.black, fontWeight: FontWeight.w600),
         ),
       ),
@@ -112,7 +112,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                     const SizedBox(height: 8),
                     AuthButton(
-                      label: 'Login',
+                      label: 'Sign In',
                       isLoading: isLoading,
                       onPressed: () => _submit(context),
                     ),
@@ -129,9 +129,9 @@ class _LoginScreenState extends State<LoginScreen> {
                           children: [
                             TextSpan(text: "Don't have an account? "),
                             TextSpan(
-                              text: 'Register',
+                              text: 'Sign up',
                               style: TextStyle(
-                                color: kAuthBrandBlue,
+                                color: Colors.blue,
                                 fontWeight: FontWeight.w600,
                               ),
                             ),

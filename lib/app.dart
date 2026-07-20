@@ -3,8 +3,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'core/theme/app_theme.dart';
 import 'core/services/location_service.dart';
 import 'core/services/overpass_service.dart';
-import 'features/louis_map/cubit/pharmacy_map_cubit.dart';
-import 'navigation/root_shell.dart';
+import 'features/blessing_auth/cubit/auth_cubit.dart';
+import 'features/blessing_auth/repository/auth_repository.dart';
+import 'navigation/auth_gate.dart';
 
 class PharmaLinkApp extends StatelessWidget {
   const PharmaLinkApp({super.key});
@@ -15,21 +16,20 @@ class PharmaLinkApp extends StatelessWidget {
       providers: [
         RepositoryProvider(create: (_) => LocationService()),
         RepositoryProvider(create: (_) => OverpassService()),
+        RepositoryProvider<AuthRepository>(create: (_) => AuthRepositoryImpl()),
       ],
-      child: MaterialApp(
-        title: 'PharmaLink',
-        theme: AppTheme.light,
-        debugShowCheckedModeBanner: false,
-        home: MultiBlocProvider(
-          providers: [
-            BlocProvider(
-              create: (context) => PharmacyMapCubit(
-                context.read<LocationService>(),
-                context.read<OverpassService>(),
-              )..loadNearbyPharmacies(),
-            ),
-          ],
-          child: const RootShell(),
+      // AuthCubit's provider lives HERE, above MaterialApp — not inside
+      // `home:`. `home:` only covers the first route; Register and
+      // Forgot Password are pushed as separate routes via Navigator.push,
+      // so a provider scoped to `home:` alone is invisible to them.
+      child: BlocProvider(
+        create: (context) =>
+            AuthCubit(context.read<AuthRepository>())..checkAuthStatus(),
+        child: MaterialApp(
+          title: 'PharmaLink',
+          theme: AppTheme.light,
+          debugShowCheckedModeBanner: false,
+          home: const AuthGate(),
         ),
       ),
     );

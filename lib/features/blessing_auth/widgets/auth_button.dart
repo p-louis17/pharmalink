@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'auth_text_field.dart';
+import '../../../core/theme/app_theme.dart';
 
 class AuthButton extends StatelessWidget {
   final String label;
@@ -22,9 +22,9 @@ class AuthButton extends StatelessWidget {
       child: ElevatedButton(
         onPressed: isLoading ? null : onPressed,
         style: ElevatedButton.styleFrom(
-          backgroundColor: kAuthBrandBlue,
+          backgroundColor: AppTheme.primary,
           foregroundColor: Colors.white,
-          disabledBackgroundColor: kAuthBrandBlue.withValues(alpha: 0.6),
+          disabledBackgroundColor: AppTheme.primary.withValues(alpha: 0.6),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10),
           ),
