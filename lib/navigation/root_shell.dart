@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import '../features/ralph_home/screens/home_screen.dart';
+import '../features/louis_map/screens/pharmacy_map_screen.dart';
 
 // Owns the bottom nav and swaps tab bodies with IndexedStack so each
 // tab keeps its own state and scroll position when you switch away and back.
 //
-// The four tabs below are inline placeholders. As each feature branch
-// lands, replace the matching placeholder with an import of the real screen, e.g.
-//   import '../features/louis_map/screens/pharmacy_map_screen.dart';
-//   ...
-//   const PharmacyMapScreen(),
+// Other placeholders get replaced the same way as each feature branch lands:
+//   import '../features/ralph_home/screens/home_screen.dart';
+//   import '../features/faith_search_detail/screens/search_screen.dart';
+//   import '../features/raquel_profile/screens/profile_screen.dart';
 //
 // Note: blessing_pharmacy_detail is NOT a tab — it's a detail screen
 // pushed (Navigator.push) from Home, Search, or Map when a pharmacy is tapped.
@@ -29,7 +29,7 @@ class _RootShellState extends State<RootShell> {
   List<Widget> get _tabs => [
         HomeScreen(onNavigateToTab: _goToTab),  // ralph_home
         const _PlaceholderTab(label: 'Search'), // faith_search_detail
-        const _PlaceholderTab(label: 'Map'),    // louis_map
+        const PharmacyMapScreen(),              // louis_map
         const _PlaceholderTab(label: 'Profile'), // raquel_profile
       ];
 
