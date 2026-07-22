@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../features/ralph_home/screens/home_screen.dart';
 import '../features/louis_map/screens/pharmacy_map_screen.dart';
+import '../features/faith_search_detail/screens/search_detail.dart';
 
 // Owns the bottom nav and swaps tab bodies with IndexedStack so each
 // tab keeps its own state and scroll position when you switch away and back.
@@ -28,7 +29,7 @@ class _RootShellState extends State<RootShell> {
 
   List<Widget> get _tabs => [
         HomeScreen(onNavigateToTab: _goToTab),  // ralph_home
-        const _PlaceholderTab(label: 'Search'), // faith_search_detail
+        const SearchResultsScreen(),            // faith_search_detail
         const PharmacyMapScreen(),              // louis_map
         const _PlaceholderTab(label: 'Profile'), // raquel_profile
       ];
