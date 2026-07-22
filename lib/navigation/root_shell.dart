@@ -54,13 +54,3 @@ class _RootShellState extends State<RootShell> {
     );
   }
 }
-
-class _PlaceholderTab extends StatelessWidget {
-  final String label;
-  const _PlaceholderTab({required this.label});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(body: Center(child: Text('$label — coming soon')));
-  }
-}
