@@ -1,7 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../models/user_profile.dart';
-import '../models/pharmacy.dart';
 
 /// Firestore/Auth calls needed by the Profile page.
 class FirestoreService {
@@ -17,27 +16,22 @@ class FirestoreService {
       _db.collection('users').doc(uid);
 
   /// Live stream of the logged-in user's profile document.
+  //
+  // Built on authStateChanges() instead of reading currentUid once —
+  // on Chrome, Firebase restores the signed-in session asynchronously,
+  // so right after opening the app currentUser can still be null for a
+  // moment. Reading it once and returning Stream.value(null) would show
+  // "No profile found" forever (nothing re-triggers the stream), which
+  // is why a hot reload/restart used to "fix" it. Listening to
+  // authStateChanges keeps this stream reactive to that late uid.
   Stream<UserProfile?> watchUserProfile() {
-    final uid = currentUid;
-    if (uid == null) return Stream.value(null);
-    return _userDoc(uid).snapshots().map((snap) {
-      if (!snap.exists) return null;
-      return UserProfile.fromMap(uid, snap.data()!);
+    return _auth.authStateChanges().asyncExpand((user) {
+      if (user == null) return Stream.value(null);
+      return _userDoc(user.uid).snapshots().map((snap) {
+        if (!snap.exists) return null;
+        return UserProfile.fromMap(user.uid, snap.data()!);
+      });
     });
-  }
-
-  /// Live stream of saved pharmacies, ordered by distance.
-  Stream<List<Pharmacy>> watchSavedPharmacies() {
-    final uid = currentUid;
-    if (uid == null) return Stream.value([]);
-    return _userDoc(uid)
-        .collection('savedPharmacies')
-        .orderBy('distanceKm')
-        .snapshots()
-        .map(
-          (snap) =>
-              snap.docs.map((d) => Pharmacy.fromMap(d.id, d.data())).toList(),
-        );
   }
 
   Future<void> updateProfile(UserProfile profile) async {

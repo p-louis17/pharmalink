@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../core/services/auth_service.dart';
+import '../features/ralph_auth/screens/login_screen.dart';
 import '../features/ralph_home/screens/home_screen.dart';
 import '../features/louis_map/screens/pharmacy_map_screen.dart';
 import '../features/faith_search_detail/screens/search_detail.dart';
@@ -23,11 +25,25 @@ class _RootShellState extends State<RootShell> {
   // can jump straight to a tab instead of going through the login screen.
   void _goToTab(int index) => setState(() => _selectedIndex = index);
 
+  // Search, Map, and Profile all require login — Home (index 0) doesn't.
+  // Tapping one of them while logged out opens the login screen instead
+  // of switching tabs.
+  void _onTabTapped(int index) {
+    final isLoggedIn = AuthService().currentUser != null;
+    if (index != 0 && !isLoggedIn) {
+      Navigator.of(context).push(
+        MaterialPageRoute(builder: (_) => const LoginScreen()),
+      );
+      return;
+    }
+    _goToTab(index);
+  }
+
   List<Widget> get _tabs => [
-        HomeScreen(onNavigateToTab: _goToTab),        // ralph_home
-        const SearchResultsScreen(),                  // faith_search_detail
-        const PharmacyMapScreen(),                    // louis_map
-        ProfileScreen(onViewMap: () => _goToTab(2)),  // racheal_profile
+        HomeScreen(onNavigateToTab: _goToTab),         // ralph_home
+        SearchResultsScreen(onNavigateToTab: _goToTab),// faith_search_detail
+        const PharmacyMapScreen(),                     // louis_map
+        ProfileScreen(onNavigateToTab: _goToTab),      // racheal_profile
       ];
 
   @override
@@ -36,7 +52,7 @@ class _RootShellState extends State<RootShell> {
       body: IndexedStack(index: _selectedIndex, children: _tabs),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedIndex,
-        onTap: _goToTab,
+        onTap: _onTabTapped,
         type: BottomNavigationBarType.fixed,
         items: const [
           BottomNavigationBarItem(

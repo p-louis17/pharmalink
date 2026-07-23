@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../core/services/auth_service.dart';
 import '../../../core/theme/app_theme.dart';
-import '../../../navigation/root_shell.dart';
 import 'register_screen.dart';
 
 // Simple email + password login form backed by Firebase Auth.
@@ -31,10 +30,11 @@ class _LoginScreenState extends State<LoginScreen> {
     setState(() => _isLoading = false);
 
     if (error == null) {
-      Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(builder: (_) => const RootShell()),
-        (route) => false,
-      );
+      // Login/Register are always pushed on top of the app's one RootShell
+      // (see app.dart) — pop back to it instead of building a new one, so
+      // we don't lose the BlocProviders (e.g. PharmacyMapCubit) that only
+      // wrap that original instance.
+      Navigator.of(context).popUntil((route) => route.isFirst);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(error)));
     }

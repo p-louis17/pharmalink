@@ -1,55 +1,35 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme/app_theme.dart';
 import '../models/pharmacy_listing.dart';
+import '../services/search_service.dart';
 import '../widgets/pharmacy_list_card.dart';
 import '../widgets/stock_section_header.dart';
 
 class SearchResultsScreen extends StatefulWidget {
-  const SearchResultsScreen({super.key});
+  // Lets the profile icon jump to the Profile tab (index 3 in root_shell).
+  final ValueChanged<int>? onNavigateToTab;
+
+  const SearchResultsScreen({super.key, this.onNavigateToTab});
 
   @override
   State<SearchResultsScreen> createState() => _SearchResultsScreenState();
 }
 
-enum _ViewMode { list, map }
-
+// null = no filter, show every status.
 class _SearchResultsScreenState extends State<SearchResultsScreen> {
-  final _searchController = TextEditingController(text: 'Amoxicillin');
-  _ViewMode _viewMode = _ViewMode.list;
+  final _searchController = TextEditingController();
+  final _searchService = SearchService();
+
+  StockStatus? _statusFilter;
   bool _inStockExpanded = true;
   bool _lowStockExpanded = true;
 
-  // Mock data — replace with the real search results once the
-  // faith_search_detail cubit/repository is wired up.
-  static const _inStock = [
-    PharmacyListing(
-      pharmacyName: 'Ubumwe Pharmacy',
-      distanceMiles: 1.2,
-      status: StockStatus.inStock,
-      updatedAgo: '2m ago',
-      priceRwf: 500,
-      source: 'Mello API',
-    ),
-    PharmacyListing(
-      pharmacyName: 'Walgreens Specialty',
-      distanceMiles: 2.4,
-      status: StockStatus.inStock,
-      updatedAgo: '5m ago',
-      priceRwf: 590,
-      source: 'Mello API',
-    ),
-  ];
-
-  static const _lowStock = [
-    PharmacyListing(
-      pharmacyName: 'MedLink Local',
-      distanceMiles: 3.1,
-      status: StockStatus.lowStock,
-      updatedAgo: '12m ago',
-      priceRwf: 500,
-      source: 'Mello API',
-    ),
-  ];
+  @override
+  void initState() {
+    super.initState();
+    // Re-run the Firestore query on every keystroke.
+    _searchController.addListener(() => setState(() {}));
+  }
 
   @override
   void dispose() {
@@ -60,6 +40,47 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
   void _openDetail(PharmacyListing listing) {
     // TODO: Navigator.push to blessing_pharmacy_detail once that
     // screen exists, passing `listing` (or a pharmacy id) along.
+  }
+
+  void _openFilterSheet() {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Padding(
+                padding: EdgeInsets.all(16),
+                child: Text(
+                  'Filter by stock status',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+                ),
+              ),
+              _FilterOption(
+                label: 'All',
+                selected: _statusFilter == null,
+                onTap: () => setState(() => _statusFilter = null),
+              ),
+              _FilterOption(
+                label: 'In Stock',
+                selected: _statusFilter == StockStatus.inStock,
+                onTap: () => setState(() => _statusFilter = StockStatus.inStock),
+              ),
+              _FilterOption(
+                label: 'Low Stock',
+                selected: _statusFilter == StockStatus.lowStock,
+                onTap: () => setState(() => _statusFilter = StockStatus.lowStock),
+              ),
+              const SizedBox(height: 8),
+            ],
+          ),
+        );
+      },
+    );
   }
 
   @override
@@ -81,7 +102,10 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 16),
-            child: Icon(Icons.account_circle_outlined, color: AppTheme.primary, size: 28),
+            child: IconButton(
+              icon: Icon(Icons.account_circle_outlined, color: AppTheme.primary, size: 28),
+              onPressed: () => widget.onNavigateToTab?.call(3),
+            ),
           ),
         ],
       ),
@@ -90,22 +114,12 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
           children: [
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
-              child: Column(
-                children: [
-                  _SearchField(controller: _searchController),
-                  const SizedBox(height: 12),
-                  _ViewModeToggle(
-                    mode: _viewMode,
-                    onChanged: (mode) => setState(() => _viewMode = mode),
-                  ),
-                ],
+              child: _SearchField(
+                controller: _searchController,
+                onFilterTap: _openFilterSheet,
               ),
             ),
-            Expanded(
-              child: _viewMode == _ViewMode.list
-                  ? _buildList()
-                  : const Center(child: Text('Map view coming soon')),
-            ),
+            Expanded(child: _buildList()),
           ],
         ),
       ),
@@ -115,40 +129,70 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
   }
 
   Widget _buildList() {
-    return ListView(
-      padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-      children: [
-        StockSectionHeader(
-          title: 'In Stock',
-          count: _inStock.length,
-          badgeColor: AppTheme.accent,
-          expanded: _inStockExpanded,
-          onTap: () => setState(() => _inStockExpanded = !_inStockExpanded),
-        ),
-        if (_inStockExpanded)
-          ..._inStock.map(
-            (l) => PharmacyListCard(listing: l, onTap: () => _openDetail(l)),
-          ),
-        const SizedBox(height: 8),
-        StockSectionHeader(
-          title: 'Low Stock',
-          count: _lowStock.length,
-          badgeColor: AppTheme.danger,
-          expanded: _lowStockExpanded,
-          onTap: () => setState(() => _lowStockExpanded = !_lowStockExpanded),
-        ),
-        if (_lowStockExpanded)
-          ..._lowStock.map(
-            (l) => PharmacyListCard(listing: l, onTap: () => _openDetail(l)),
-          ),
-      ],
+    return StreamBuilder<List<PharmacyListing>>(
+      stream: _searchService.watchListings(_searchController.text),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        if (snapshot.hasError) {
+          return Center(child: Text('Something went wrong: ${snapshot.error}'));
+        }
+
+        var results = snapshot.data ?? [];
+        if (_statusFilter != null) {
+          results = results.where((l) => l.status == _statusFilter).toList();
+        }
+
+        final inStock = results.where((l) => l.status == StockStatus.inStock).toList();
+        final lowStock = results.where((l) => l.status == StockStatus.lowStock).toList();
+
+        if (inStock.isEmpty && lowStock.isEmpty) {
+          return const Center(child: Text('No stock results found.'));
+        }
+
+        return ListView(
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+          children: [
+            if (inStock.isNotEmpty) ...[
+              StockSectionHeader(
+                title: 'In Stock',
+                count: inStock.length,
+                badgeColor: AppTheme.accent,
+                expanded: _inStockExpanded,
+                onTap: () => setState(() => _inStockExpanded = !_inStockExpanded),
+              ),
+              if (_inStockExpanded)
+                ...inStock.map(
+                  (l) => PharmacyListCard(listing: l, onTap: () => _openDetail(l)),
+                ),
+              const SizedBox(height: 8),
+            ],
+            if (lowStock.isNotEmpty) ...[
+              StockSectionHeader(
+                title: 'Low Stock',
+                count: lowStock.length,
+                badgeColor: AppTheme.danger,
+                expanded: _lowStockExpanded,
+                onTap: () => setState(() => _lowStockExpanded = !_lowStockExpanded),
+              ),
+              if (_lowStockExpanded)
+                ...lowStock.map(
+                  (l) => PharmacyListCard(listing: l, onTap: () => _openDetail(l)),
+                ),
+            ],
+          ],
+        );
+      },
     );
   }
 }
 
 class _SearchField extends StatelessWidget {
   final TextEditingController controller;
-  const _SearchField({required this.controller});
+  final VoidCallback onFilterTap;
+
+  const _SearchField({required this.controller, required this.onFilterTap});
 
   @override
   Widget build(BuildContext context) {
@@ -179,51 +223,17 @@ class _SearchField extends StatelessWidget {
               ),
             ),
           ),
-          Container(
-            margin: const EdgeInsets.all(6),
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: Colors.grey.shade100,
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Icon(Icons.tune, size: 18, color: Colors.grey.shade700),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _ViewModeToggle extends StatelessWidget {
-  final _ViewMode mode;
-  final ValueChanged<_ViewMode> onChanged;
-
-  const _ViewModeToggle({required this.mode, required this.onChanged});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(4),
-      decoration: BoxDecoration(
-        color: Colors.grey.shade200,
-        borderRadius: BorderRadius.circular(24),
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: _ToggleButton(
-              label: 'List',
-              icon: Icons.reorder,
-              selected: mode == _ViewMode.list,
-              onTap: () => onChanged(_ViewMode.list),
-            ),
-          ),
-          Expanded(
-            child: _ToggleButton(
-              label: 'Map',
-              icon: Icons.map_outlined,
-              selected: mode == _ViewMode.map,
-              onTap: () => onChanged(_ViewMode.map),
+          InkWell(
+            onTap: onFilterTap,
+            borderRadius: BorderRadius.circular(10),
+            child: Container(
+              margin: const EdgeInsets.all(6),
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.grey.shade100,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Icon(Icons.tune, size: 18, color: Colors.grey.shade700),
             ),
           ),
         ],
@@ -232,55 +242,26 @@ class _ViewModeToggle extends StatelessWidget {
   }
 }
 
-class _ToggleButton extends StatelessWidget {
+class _FilterOption extends StatelessWidget {
   final String label;
-  final IconData icon;
   final bool selected;
   final VoidCallback onTap;
 
-  const _ToggleButton({
+  const _FilterOption({
     required this.label,
-    required this.icon,
     required this.selected,
     required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 150),
-        padding: const EdgeInsets.symmetric(vertical: 10),
-        decoration: BoxDecoration(
-          color: selected ? Colors.white : Colors.transparent,
-          borderRadius: BorderRadius.circular(20),
-          boxShadow: selected
-              ? [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.08),
-                    blurRadius: 6,
-                    offset: const Offset(0, 2),
-                  ),
-                ]
-              : null,
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(icon, size: 16, color: selected ? Colors.black87 : Colors.grey.shade600),
-            const SizedBox(width: 6),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                color: selected ? Colors.black87 : Colors.grey.shade600,
-              ),
-            ),
-          ],
-        ),
-      ),
+    return ListTile(
+      title: Text(label),
+      trailing: selected ? Icon(Icons.check, color: AppTheme.primary) : null,
+      onTap: () {
+        onTap();
+        Navigator.of(context).pop();
+      },
     );
   }
 }

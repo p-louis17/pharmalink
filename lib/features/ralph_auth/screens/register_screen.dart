@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../../../core/services/auth_service.dart';
-import '../../../navigation/root_shell.dart';
 
 // Registration form: name, address, email, phone, date of birth, password.
 class RegisterScreen extends StatefulWidget {
@@ -55,10 +54,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
     setState(() => _isLoading = false);
 
     if (error == null) {
-      Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(builder: (_) => const RootShell()),
-        (route) => false,
-      );
+      // Same reasoning as LoginScreen: pop back to the app's one RootShell
+      // instead of building a new, unprovided one.
+      Navigator.of(context).popUntil((route) => route.isFirst);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(error)));
     }

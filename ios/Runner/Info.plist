@@ -26,6 +26,10 @@
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>PharmaLink uses your location to find nearby pharmacies.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>PharmaLink uses your location to find nearby pharmacies.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

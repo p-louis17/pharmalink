@@ -13,6 +13,11 @@ class AuthService {
       await _auth.signInWithEmailAndPassword(email: email.trim(), password: password);
       return null;
     } on FirebaseAuthException catch (e) {
+      if (e.code == 'invalid-credential' ||
+          e.code == 'wrong-password' ||
+          e.code == 'user-not-found') {
+        return 'Wrong password or email.';
+      }
       return e.message ?? 'Login failed. Please try again.';
     }
   }
@@ -35,7 +40,7 @@ class AuthService {
       );
 
       await _firestore.collection('users').doc(credential.user!.uid).set({
-        'name': name.trim(),
+        'fullName': name.trim(),
         'address': address.trim(),
         'email': email.trim(),
         'phone': phone.trim(),
@@ -46,6 +51,12 @@ class AuthService {
       return null;
     } on FirebaseAuthException catch (e) {
       return e.message ?? 'Registration failed. Please try again.';
+    } catch (e) {
+      // The Auth account can be created successfully even if saving the
+      // profile to Firestore fails (e.g. security rules blocking the
+      // write) — without this, that failure would pass silently and the
+      // person would never see a "users/{uid}" document.
+      return 'Account created, but saving your profile failed: $e';
     }
   }
 

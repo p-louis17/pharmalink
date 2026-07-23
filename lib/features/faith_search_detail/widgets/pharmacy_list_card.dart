@@ -122,7 +122,7 @@ class PharmacyListCard extends StatelessWidget {
                     Expanded(
                       child: _LabelValue(
                         label: 'Updated',
-                        value: listing.updatedAgo,
+                        value: listing.updatedAgoLabel,
                       ),
                     ),
                     _LabelValue(
