@@ -83,7 +83,17 @@ class PharmacyDetailScreen extends StatelessWidget {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton.icon(
-                  onPressed: () => PharmacyActions.openDirectionsByName(pharmacyName),
+                  onPressed: () async {
+                    try {
+                      await PharmacyActions.openDirectionsByName(pharmacyName);
+                    } catch (e) {
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Could not open directions')),
+                        );
+                      }
+                    }
+                  },
                   icon: const Icon(Icons.directions),
                   label: const Text('Get Directions'),
                 ),
