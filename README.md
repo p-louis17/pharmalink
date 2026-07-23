@@ -8,15 +8,18 @@ cd pharmalink
 flutter pub get
 ```
 
-## 2. Get the Google Maps API key from Louis
+## 2. Run it — no API keys needed
 
-You'll need it to run the app locally. Don't put it in code or commit it — pass it in at run time:
+Firebase config (`google-services.json`, `GoogleService-Info.plist`, `firebase_options.dart`) is already committed to the repo, so it works out of the box — no `flutterfire configure` needed. The map uses free OpenStreetMap tiles (`flutter_map`), not Google Maps, so there's no map API key to request either.
 
 ```bash
-flutter run --dart-define=GOOGLE_MAPS_API_KEY=the_key_here
+flutter run -d chrome          # fastest for quick checks
+# or
+open -a Simulator && flutter run -d "iPhone 17"
+# or an Android emulator/device: flutter devices, then flutter run -d <id>
 ```
 
-If you're using VS Code, add it to `.vscode/launch.json` instead so you don't retype it every time (ask Louis for the snippet).
+Grant location permission when prompted — the Map tab needs it. To log in, register a new account from the app's Register screen; there's no shared test account unless someone posts one in the group chat.
 
 ## 3. Project structure
 
@@ -26,10 +29,11 @@ lib/
 ├── core/                         # shared stuff: theme, constants, shared services/widgets
 ├── navigation/root_shell.dart    # bottom nav — owns the 4 tabs below
 └── features/
+    ├── ralph_auth/               ← Ralph        (login / register)
     ├── ralph_home/               ← Ralph        (bottom nav: Home)
     ├── faith_search_detail/      ← Faith        (bottom nav: Search)
     ├── louis_map/                ← Louis        (bottom nav: Map)
-    ├── raquel_profile/           ← Raquel       (bottom nav: Profile)
+    ├── racheal_profile/          ← Racheal      (bottom nav: Profile)
     └── blessing_pharmacy_detail/ ← Blessing     (NOT a tab — a detail screen
                                                     pushed from Home/Search/Map
                                                     when a pharmacy is tapped)
