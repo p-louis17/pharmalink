@@ -7,8 +7,28 @@ import '../cubit/pharmacy_map_state.dart';
 import '../models/pharmacy.dart';
 import '../widgets/pharmacy_detail_card.dart';
 
-class PharmacyMapScreen extends StatelessWidget {
+class PharmacyMapScreen extends StatefulWidget {
   const PharmacyMapScreen({super.key});
+
+  @override
+  State<PharmacyMapScreen> createState() => _PharmacyMapScreenState();
+}
+
+class _PharmacyMapScreenState extends State<PharmacyMapScreen> {
+  final _searchController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    // Re-filter the marker list on every keystroke.
+    _searchController.addListener(() => setState(() {}));
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
 
   Color _markerColorFor(StockStatus status) {
     switch (status) {
@@ -55,6 +75,16 @@ class PharmacyMapScreen extends StatelessWidget {
           final cubit = context.read<PharmacyMapCubit>();
           final userLatLng = LatLng(loaded.userPosition.latitude, loaded.userPosition.longitude);
 
+          // Empty search box = show every nearby pharmacy. Otherwise only
+          // show pins whose name or address contains what was typed.
+          final query = _searchController.text.trim().toLowerCase();
+          final visiblePharmacies = query.isEmpty
+              ? loaded.pharmacies
+              : loaded.pharmacies.where((p) {
+                  return p.name.toLowerCase().contains(query) ||
+                      p.address.toLowerCase().contains(query);
+                }).toList();
+
           return Stack(
             children: [
               FlutterMap(
@@ -78,7 +108,7 @@ class PharmacyMapScreen extends StatelessWidget {
                         height: 24,
                         child: const Icon(Icons.my_location, color: Colors.blue),
                       ),
-                      ...loaded.pharmacies.map((p) {
+                      ...visiblePharmacies.map((p) {
                         return Marker(
                           point: LatLng(p.lat, p.lng),
                           width: 40,
@@ -112,10 +142,10 @@ class PharmacyMapScreen extends StatelessWidget {
                     elevation: 2,
                     borderRadius: BorderRadius.circular(12),
                     child: TextField(
+                      controller: _searchController,
                       decoration: InputDecoration(
-                        hintText: 'Search medication or pharmacy',
+                        hintText: 'Search nearby pharmacies',
                         prefixIcon: const Icon(Icons.search),
-                        suffixIcon: IconButton(icon: const Icon(Icons.tune), onPressed: () {}),
                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
                         filled: true,
                         fillColor: Colors.white,
