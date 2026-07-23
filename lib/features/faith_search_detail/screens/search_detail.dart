@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../blessing_pharmacy_detail/screens/pharmacy_detail_screen.dart';
 import '../models/pharmacy_listing.dart';
 import '../services/search_service.dart';
 import '../widgets/pharmacy_list_card.dart';
@@ -38,8 +39,14 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
   }
 
   void _openDetail(PharmacyListing listing) {
-    // TODO: Navigator.push to blessing_pharmacy_detail once that
-    // screen exists, passing `listing` (or a pharmacy id) along.
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => PharmacyDetailScreen(
+          pharmacyName: listing.pharmacyName,
+          onNavigateToTab: widget.onNavigateToTab,
+        ),
+      ),
+    );
   }
 
   void _openFilterSheet() {

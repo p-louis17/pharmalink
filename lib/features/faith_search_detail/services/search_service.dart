@@ -28,4 +28,18 @@ class SearchService {
               .toList(),
         );
   }
+
+  // Every medicine one specific pharmacy currently has stock data for —
+  // used by the pharmacy detail screen.
+  Stream<List<PharmacyListing>> watchPharmacyStock(String pharmacyName) {
+    return _db
+        .collection('medicineStock')
+        .where('pharmacyName', isEqualTo: pharmacyName)
+        .snapshots()
+        .map(
+          (snap) => snap.docs
+              .map((doc) => PharmacyListing.fromMap(doc.data()))
+              .toList(),
+        );
+  }
 }
