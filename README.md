@@ -70,4 +70,6 @@ flutter analyze     # no warnings
 flutter run          # confirm it actually builds and the bottom nav still works
 ```
 
-Questions → group chat, don't guess.
+Testing email:
+student@gmail.com
+student12
