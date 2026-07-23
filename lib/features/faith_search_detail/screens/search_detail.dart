@@ -107,7 +107,7 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
           Padding(
             padding: const EdgeInsets.only(right: 16),
             child: IconButton(
-              icon: Icon(Icons.account_circle_outlined, color: AppTheme.primary, size: 28),
+              icon: Icon(Icons.account_circle, color: AppTheme.primary),
               onPressed: () => widget.onNavigateToTab?.call(3),
             ),
           ),

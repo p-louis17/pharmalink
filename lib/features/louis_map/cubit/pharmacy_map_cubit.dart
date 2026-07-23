@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:geolocator/geolocator.dart';
 import '../../../core/services/location_service.dart';
 import '../../../core/services/overpass_service.dart';
 import '../models/pharmacy.dart';
@@ -14,7 +15,7 @@ class PharmacyMapCubit extends Cubit<PharmacyMapState> {
     emit(PharmacyMapLoading());
     try {
       final position = await _locationService.getCurrentPosition();
-      final rawResults = await _overpassService.searchNearbyPharmacies(position: position);
+      final rawResults = await _searchPharmaciesWithRetry(position);
       final pharmacies = rawResults.map(Pharmacy.fromOverpassJson).toList();
 
       emit(PharmacyMapLoaded(userPosition: position, pharmacies: pharmacies));
@@ -24,6 +25,19 @@ class PharmacyMapCubit extends Cubit<PharmacyMapState> {
       emit(PharmacyMapError(e.message));
     } catch (e) {
       emit(PharmacyMapError('Something went wrong: $e'));
+    }
+  }
+
+  // Overpass's free public mirrors occasionally time out (504) under load —
+  // one quick automatic retry clears most of those before the person ever
+  // sees the error screen. If it fails twice in a row, let it throw so the
+  // normal error handling above shows the manual Retry button.
+  Future<List<Map<String, dynamic>>> _searchPharmaciesWithRetry(Position position) async {
+    try {
+      return await _overpassService.searchNearbyPharmacies(position: position);
+    } on OverpassServiceException {
+      await Future.delayed(const Duration(seconds: 2));
+      return await _overpassService.searchNearbyPharmacies(position: position);
     }
   }
 
