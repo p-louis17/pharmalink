@@ -17,6 +17,21 @@ class PharmacyActions {
     }
   }
 
+  // For pharmacies where we only know the name — no lat/lng on hand.
+  // Hope Pharmacy and Ubumwe Pharmacy only exist in the "medicineStock"
+  // collection, which has no coordinates, so let Google/Apple Maps
+  // resolve the location by name instead of routing to a coordinate.
+  static Future<void> openDirectionsByName(String pharmacyName) async {
+    final query = Uri.encodeComponent('$pharmacyName, Kigali, Rwanda');
+    final Uri uri = (!kIsWeb && Platform.isIOS)
+        ? Uri.parse('https://maps.apple.com/?q=$query')
+        : Uri.parse('https://www.google.com/maps/search/?api=1&query=$query');
+
+    if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
+      throw Exception('Could not open maps for $pharmacyName');
+    }
+  }
+
   static Future<void> callPharmacy(String phoneNumber) async {
     final uri = Uri(scheme: 'tel', path: phoneNumber);
     if (!await launchUrl(uri)) {

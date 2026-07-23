@@ -3,6 +3,7 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/loading_indicator.dart';
 import '../../faith_search_detail/models/pharmacy_listing.dart';
 import '../../faith_search_detail/services/search_service.dart';
+import '../../louis_map/widgets/pharmacy_actions.dart';
 
 // Pushed (Navigator.push) from Home, Search, or Map when a pharmacy is
 // tapped. Only needs the pharmacy's name — everything shown here comes
@@ -11,17 +12,7 @@ import '../../faith_search_detail/services/search_service.dart';
 class PharmacyDetailScreen extends StatelessWidget {
   final String pharmacyName;
 
-  // Lets "Get Directions" close this screen and jump straight to the Map
-  // tab in RootShell. For now that just opens the map — once pharmacies
-  // are linked to map pins, this can pass the specific pharmacy along
-  // instead of only switching tabs.
-  final ValueChanged<int>? onNavigateToTab;
-
-  const PharmacyDetailScreen({
-    super.key,
-    required this.pharmacyName,
-    this.onNavigateToTab,
-  });
+  const PharmacyDetailScreen({super.key, required this.pharmacyName});
 
   @override
   Widget build(BuildContext context) {
@@ -92,14 +83,7 @@ class PharmacyDetailScreen extends StatelessWidget {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton.icon(
-                  onPressed: () {
-                    // Every pharmacy has the same hours for now, so this
-                    // just opens the Map tab — see the note on
-                    // onNavigateToTab above for what changes once map
-                    // pins are linked to a specific pharmacy.
-                    Navigator.of(context).pop();
-                    onNavigateToTab?.call(2);
-                  },
+                  onPressed: () => PharmacyActions.openDirectionsByName(pharmacyName),
                   icon: const Icon(Icons.directions),
                   label: const Text('Get Directions'),
                 ),

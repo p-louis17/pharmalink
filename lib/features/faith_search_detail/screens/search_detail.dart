@@ -41,10 +41,7 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
   void _openDetail(PharmacyListing listing) {
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (_) => PharmacyDetailScreen(
-          pharmacyName: listing.pharmacyName,
-          onNavigateToTab: widget.onNavigateToTab,
-        ),
+        builder: (_) => PharmacyDetailScreen(pharmacyName: listing.pharmacyName),
       ),
     );
   }
