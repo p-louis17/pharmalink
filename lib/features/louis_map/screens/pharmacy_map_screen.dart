@@ -91,7 +91,7 @@ class _PharmacyMapScreenState extends State<PharmacyMapScreen> {
                 options: MapOptions(
                   initialCenter: userLatLng,
                   initialZoom: 14,
-                  onTap: (_, __) => cubit.clearSelection(),
+                  onTap: (_, _) => cubit.clearSelection(),
                 ),
                 children: [
                   TileLayer(
