@@ -39,6 +39,7 @@ dependencies:
   flutter_map: ^8.3.1
   latlong2: ^0.10.1
   url_launcher: ^6.3.2
+  shared_preferences: ^2.3.3
 
   # Firebase — used for authentication (email/password) and the Firestore database.
   firebase_core: ^4.11.0

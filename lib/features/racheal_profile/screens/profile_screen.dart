@@ -1,13 +1,28 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/loading_indicator.dart';
 import '../models/user_profile.dart';
 import '../services/firestore_service.dart';
 import '../widgets/profile_widgets.dart';
 
+// Key used to save the "low stock notifications" setting locally so it
+// survives an app restart (SharedPreferences), separate from Firestore.
+const String _kNotifyPrefKey = 'notify_low_stock';
+
 const List<String> _kMonthNames = [
-  'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-  'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+  'Jan',
+  'Feb',
+  'Mar',
+  'Apr',
+  'May',
+  'Jun',
+  'Jul',
+  'Aug',
+  'Sep',
+  'Oct',
+  'Nov',
+  'Dec',
 ];
 
 class ProfileScreen extends StatefulWidget {
@@ -25,6 +40,61 @@ class _ProfileScreenState extends State<ProfileScreen> {
   final _service = FirestoreService.instance;
   bool _insuranceExpanded = true;
   bool _supportExpanded = false;
+
+  // "Notify me about low stock" — stored locally with SharedPreferences,
+  // not in Firestore, so it survives an app restart on this device.
+  bool _notifyLowStock = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadNotifyPref();
+  }
+
+  Future<void> _loadNotifyPref() async {
+    final prefs = await SharedPreferences.getInstance();
+    if (!mounted) return;
+    setState(() => _notifyLowStock = prefs.getBool(_kNotifyPrefKey) ?? false);
+  }
+
+  Future<void> _toggleNotifyPref(bool value) async {
+    setState(() => _notifyLowStock = value);
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_kNotifyPrefKey, value);
+  }
+
+  Future<void> _confirmDeleteProfile(UserProfile user) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete My Data'),
+        content: const Text(
+          'This removes your saved profile information from PharmaLink. '
+          'This cannot be undone.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(backgroundColor: AppTheme.danger),
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      await _service.deleteProfile(user.uid);
+      // Data's gone — sign out and drop back to Home instead of leaving
+      // the person stuck on a "No profile found" screen with no way out.
+      await _service.signOut();
+      if (!mounted) return;
+      widget.onNavigateToTab?.call(0);
+    }
+  }
 
   String _dateLabel(DateTime? date) {
     if (date == null) return 'Not set';
@@ -97,17 +167,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
 
     if (saved == true) {
-      await _service.updateProfile(user.copyWith(
-        fullName: nameController.text.trim(),
-        phone: phoneController.text.trim(),
-        address: addressController.text.trim(),
-        dob: selectedDob,
-      ));
+      await _service.updateProfile(
+        user.copyWith(
+          fullName: nameController.text.trim(),
+          phone: phoneController.text.trim(),
+          address: addressController.text.trim(),
+          dob: selectedDob,
+        ),
+      );
     }
   }
 
   Future<void> _openAddInsuranceDialog(UserProfile user) async {
-    final controller = TextEditingController(text: user.insuranceProvider ?? '');
+    final controller = TextEditingController(
+      text: user.insuranceProvider ?? '',
+    );
     final result = await showDialog<String>(
       context: context,
       builder: (context) => AlertDialog(
@@ -145,7 +219,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
         leading: const Icon(Icons.local_pharmacy, color: AppTheme.primary),
         title: const Text(
           'PharmaLink',
-          style: TextStyle(color: AppTheme.primary, fontWeight: FontWeight.bold),
+          style: TextStyle(
+            color: AppTheme.primary,
+            fontWeight: FontWeight.bold,
+          ),
         ),
       ),
       body: StreamBuilder<UserProfile?>(
@@ -160,7 +237,38 @@ class _ProfileScreenState extends State<ProfileScreen> {
           // unhandled.
           final user = userSnap.hasError ? null : userSnap.data;
           if (user == null) {
-            return const Center(child: Text('No profile found.'));
+            // No matter how we got here (deleted data, missing doc,
+            // permission error) — always give the person a way back out
+            // instead of a dead-end screen.
+            return Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text('No profile found.'),
+                  const SizedBox(height: 12),
+                  TextButton.icon(
+                    onPressed: () async {
+                      await _service.signOut();
+                      if (!mounted) return;
+                      widget.onNavigateToTab?.call(0);
+                    },
+                    icon: Icon(
+                      Icons.logout_rounded,
+                      size: 18,
+                      color: AppTheme.danger,
+                    ),
+                    label: Text(
+                      'Log Out',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: AppTheme.danger,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            );
           }
 
           return ListView(
@@ -175,18 +283,28 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     CircleAvatar(
                       radius: 40,
                       backgroundColor: Colors.grey.shade200,
-                      child: Icon(Icons.person, size: 36, color: Colors.grey.shade600),
+                      child: Icon(
+                        Icons.person,
+                        size: 36,
+                        color: Colors.grey.shade600,
+                      ),
                     ),
                     const SizedBox(height: 8),
                     Text(
                       user.fullName,
-                      style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w600),
+                      style: const TextStyle(
+                        fontSize: 17,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                     if (user.email != null) ...[
                       const SizedBox(height: 2),
                       Text(
                         user.email!,
-                        style: TextStyle(fontSize: 13, color: Colors.grey.shade600),
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: Colors.grey.shade600,
+                        ),
                       ),
                     ],
                     const SizedBox(height: 6),
@@ -200,16 +318,36 @@ class _ProfileScreenState extends State<ProfileScreen> {
               SectionLabel(
                 'Personal Information',
                 trailing: IconButton(
-                  icon: Icon(Icons.edit_outlined, size: 18, color: AppTheme.primary),
+                  icon: Icon(
+                    Icons.edit_outlined,
+                    size: 18,
+                    color: AppTheme.primary,
+                  ),
                   onPressed: () => _openEditInfoDialog(user),
                 ),
               ),
               SectionCard(
                 children: [
-                  InfoRow(icon: Icons.person_outline, label: 'Full Name', value: user.fullName),
-                  InfoRow(icon: Icons.email_outlined, label: 'Email', value: user.email ?? 'Not set'),
-                  InfoRow(icon: Icons.phone_outlined, label: 'Phone', value: user.phone ?? 'Not set'),
-                  InfoRow(icon: Icons.calendar_today_outlined, label: 'Date of Birth', value: _dateLabel(user.dob)),
+                  InfoRow(
+                    icon: Icons.person_outline,
+                    label: 'Full Name',
+                    value: user.fullName,
+                  ),
+                  InfoRow(
+                    icon: Icons.email_outlined,
+                    label: 'Email',
+                    value: user.email ?? 'Not set',
+                  ),
+                  InfoRow(
+                    icon: Icons.phone_outlined,
+                    label: 'Phone',
+                    value: user.phone ?? 'Not set',
+                  ),
+                  InfoRow(
+                    icon: Icons.calendar_today_outlined,
+                    label: 'Date of Birth',
+                    value: _dateLabel(user.dob),
+                  ),
                   InfoRow(
                     icon: Icons.location_on_outlined,
                     label: 'Address',
@@ -225,9 +363,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 icon: Icons.shield_outlined,
                 title: 'Insurance Information',
                 expanded: _insuranceExpanded,
-                onToggle: () => setState(() => _insuranceExpanded = !_insuranceExpanded),
+                onToggle: () =>
+                    setState(() => _insuranceExpanded = !_insuranceExpanded),
                 children: [
-                  if (user.insuranceProvider == null || user.insuranceProvider!.isEmpty) ...[
+                  if (user.insuranceProvider == null ||
+                      user.insuranceProvider!.isEmpty) ...[
                     const Text(
                       'No insurance information added.',
                       style: TextStyle(fontWeight: FontWeight.w600),
@@ -235,7 +375,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     const SizedBox(height: 4),
                     Text(
                       'Add your insurance details to make your pharmacy experience better.',
-                      style: TextStyle(fontSize: 13, color: Colors.grey.shade600),
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: Colors.grey.shade600,
+                      ),
                     ),
                     const SizedBox(height: 12),
                     SizedBox(
@@ -260,16 +403,55 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
               const SizedBox(height: 16),
 
+              // --- App Settings ---
+              const SectionLabel('App Settings'),
+              SectionCard(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 4,
+                    ),
+                    child: Row(
+                      children: [
+                        const Expanded(
+                          child: Text(
+                            'Notify me about low stock',
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                        Switch(
+                          value: _notifyLowStock,
+                          onChanged: _toggleNotifyPref,
+                          activeThumbColor: AppTheme.primary,
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+
               // --- Contact Support ---
               ExpandableSection(
                 icon: Icons.support_agent_outlined,
                 title: 'Contact Support',
                 expanded: _supportExpanded,
-                onToggle: () => setState(() => _supportExpanded = !_supportExpanded),
+                onToggle: () =>
+                    setState(() => _supportExpanded = !_supportExpanded),
                 children: const [
-                  Text('pharmaLink@techsupport.com', style: TextStyle(fontWeight: FontWeight.w600)),
+                  Text(
+                    'pharmaLink@techsupport.com',
+                    style: TextStyle(fontWeight: FontWeight.w600),
+                  ),
                   SizedBox(height: 4),
-                  Text('+2349340034043', style: TextStyle(fontWeight: FontWeight.w600)),
+                  Text(
+                    '+2349340034043',
+                    style: TextStyle(fontWeight: FontWeight.w600),
+                  ),
                 ],
               ),
               const SizedBox(height: 24),
@@ -281,13 +463,38 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     await _service.signOut();
                     widget.onNavigateToTab?.call(0);
                   },
-                  icon: Icon(Icons.logout_rounded, size: 18, color: AppTheme.danger),
+                  icon: Icon(
+                    Icons.logout_rounded,
+                    size: 18,
+                    color: AppTheme.danger,
+                  ),
                   label: Text(
                     'Log Out',
                     style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
                       color: AppTheme.danger,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 4),
+
+              // --- Delete My Data ---
+              Center(
+                child: TextButton.icon(
+                  onPressed: () => _confirmDeleteProfile(user),
+                  icon: Icon(
+                    Icons.delete_outline,
+                    size: 18,
+                    color: Colors.grey.shade500,
+                  ),
+                  label: Text(
+                    'Delete My Data',
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.grey.shade500,
                     ),
                   ),
                 ),

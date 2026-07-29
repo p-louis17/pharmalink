@@ -38,5 +38,9 @@ class FirestoreService {
     await _userDoc(profile.uid).set(profile.toMap(), SetOptions(merge: true));
   }
 
+  /// Deletes the logged-in user's Firestore profile document.
+  /// (Does not delete the Firebase Auth account itself, just the data.)
+  Future<void> deleteProfile(String uid) => _userDoc(uid).delete();
+
   Future<void> signOut() => _auth.signOut();
 }

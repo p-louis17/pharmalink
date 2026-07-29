@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../blessing_pharmacy_detail/screens/pharmacy_detail_screen.dart';
 import '../models/pharmacy_listing.dart';
 import '../services/search_service.dart';
 import '../widgets/pharmacy_list_card.dart';
