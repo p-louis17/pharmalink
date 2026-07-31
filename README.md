@@ -80,33 +80,33 @@ Drop each image into `docs/screenshots/` using the filename already referenced b
 
 ### Auth — Ralph
 
-![Login screen](docs/screenshots/login.png)
+![Login screen](docs/login.png)
 *Login screen — email/password fields, "Register" link. Also grab one showing the "Wrong password or email" error state.*
 
-![Register screen](docs/screenshots/register.png)
+![Register screen](docs/register.png)
 *Register screen — full form (name, address, email, phone, DOB, password), ideally with an empty-field validation error visible.*
 
 ### Home — Ralph
 
-![Home tab](docs/screenshots/home.png)
+![Home tab](docs/home.png)
 *Home tab, logged-in state.*
 
 ### Search — Faith
 
-![Search tab](docs/screenshots/search.png)
+![Search tab](docs/search.png)
 *Search tab with a query typed in and results split into "In Stock" / "Low Stock" sections.*
 
 ### Map — Louis
 
-![Map tab](docs/screenshots/map.png)
+![Map tab](docs/map.png)
 *Map tab with pharmacy pins visible, one pin tapped so the detail card is showing at the bottom.*
 
 ### Pharmacy Detail — Blessing
 
-![Pharmacy detail screen](docs/screenshots/pharmacy_detail.png)
+![Pharmacy detail screen](docs/pharmacy_detail.png)
 *Pharmacy detail screen (reached by tapping a pin or a search result) — medicine stock list and the "Get Directions" button.*
 
 ### Profile — Racheal
 
-![Profile tab](docs/screenshots/profile.png)
+![Profile tab](docs/profile.png)
 *Profile tab — personal info, insurance section, the "Notify me about low stock" toggle, and the Log Out / Delete My Data buttons at the bottom.*
