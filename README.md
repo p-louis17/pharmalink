@@ -15,7 +15,7 @@ Firebase config (`google-services.json`, `GoogleService-Info.plist`, `firebase_o
 ```bash
 flutter run -d chrome          # fastest for quick checks
 # or
-open -a Simulator && flutter run -d "iPhone 17"
+open -a Simulator && flutter run
 # or an Android emulator/device: flutter devices, then flutter run -d <id>
 ```
 
