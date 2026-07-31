@@ -19,7 +19,7 @@ open -a Simulator && flutter run
 # or an Android emulator/device: flutter devices, then flutter run -d <id>
 ```
 
-Grant location permission when prompted — the Map tab needs it. To log in, register a new account from the app's Register screen; there's no shared test account unless someone posts one in the group chat.
+Grant location permission when prompted : the Map tab needs it. To log in, register a new account from the app's Register screen; there's no shared test account unless someone posts one in the group chat.
 
 ## 3. Project structure
 
