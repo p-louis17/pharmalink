@@ -103,7 +103,7 @@ Drop each image into `docs/screenshots/` using the filename already referenced b
 
 ### Pharmacy Detail — Blessing
 
-![Pharmacy detail screen](docs/pharmacy_detail.png)
+![Pharmacy detail screen](docs/detail.png)
 *Pharmacy detail screen (reached by tapping a pin or a search result) — medicine stock list and the "Get Directions" button.*
 
 ### Profile — Racheal
